@@ -86,8 +86,8 @@ class ExtendedRenderParagraph extends _RenderParagraph
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineChildren(
-        constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth,
+        ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 

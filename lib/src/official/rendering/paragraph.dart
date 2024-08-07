@@ -398,10 +398,10 @@ class _RenderParagraph extends RenderBox
     }
     final List<PlaceholderDimensions> placeholderDimensions =
         layoutInlineChildren(
-      double.infinity,
-      (RenderBox child, BoxConstraints constraints) =>
-          Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
-    );
+            double.infinity,
+            (RenderBox child, BoxConstraints constraints) =>
+                Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+            ChildLayoutHelper.getBaseline);
     return (_textIntrinsics
           ..setPlaceholderDimensions(placeholderDimensions)
           ..layout())
@@ -415,12 +415,12 @@ class _RenderParagraph extends RenderBox
     }
     final List<PlaceholderDimensions> placeholderDimensions =
         layoutInlineChildren(
-      double.infinity,
-      // Height and baseline is irrelevant as all text will be laid
-      // out in a single line. Therefore, using 0.0 as a dummy for the height.
-      (RenderBox child, BoxConstraints constraints) =>
-          Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
-    );
+            double.infinity,
+            // Height and baseline is irrelevant as all text will be laid
+            // out in a single line. Therefore, using 0.0 as a dummy for the height.
+            (RenderBox child, BoxConstraints constraints) =>
+                Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+            ChildLayoutHelper.getBaseline);
     return (_textIntrinsics
           ..setPlaceholderDimensions(placeholderDimensions)
           ..layout())
@@ -432,8 +432,8 @@ class _RenderParagraph extends RenderBox
       return 0.0;
     }
     return (_textIntrinsics
-          ..setPlaceholderDimensions(
-              layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild))
+          ..setPlaceholderDimensions(layoutInlineChildren(width,
+              ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getBaseline))
           ..layout(minWidth: width, maxWidth: _adjustMaxWidth(width)))
         .height;
   }
@@ -573,8 +573,8 @@ class _RenderParagraph extends RenderBox
       return Size.zero;
     }
     final Size size = (_textIntrinsics
-          ..setPlaceholderDimensions(layoutInlineChildren(
-              constraints.maxWidth, ChildLayoutHelper.dryLayoutChild))
+          ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth,
+              ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getBaseline))
           ..layout(
               minWidth: constraints.minWidth,
               maxWidth: _adjustMaxWidth(constraints.maxWidth)))
@@ -585,8 +585,8 @@ class _RenderParagraph extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineChildren(
-        constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth,
+        ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
@@ -1246,6 +1246,7 @@ class _SelectableFragment
             result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition,
                 isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.document:
+          case TextGranularity.paragraph:
           case TextGranularity.line:
             assert(false,
                 'Moving the selection edge by line or document is not supported.');
@@ -1274,6 +1275,8 @@ class _SelectableFragment
           directionallyExtendSelection.isEnd,
           directionallyExtendSelection.direction,
         );
+      case SelectionEventType.selectParagraph:
+      // TODO: Handle this case.
     }
 
     if (existingSelectionStart != _textSelectionStart ||
@@ -1775,6 +1778,7 @@ class _SelectableFragment
             targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
       case TextGranularity.document:
+      case TextGranularity.paragraph:
         final String text = range.textInside(fullText);
         newPosition = _moveBeyondTextBoundaryAtDirection(
             targetedEdge, forward, DocumentBoundary(text));

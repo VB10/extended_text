@@ -163,8 +163,8 @@ mixin TextOverflowMixin on _RenderParagraph {
         // recreate text
 
         _textPainter.text = testTextPainter.text;
-        _placeholderDimensions = layoutInlineChildren(
-            constraints.maxWidth, ChildLayoutHelper.layoutChild);
+        _placeholderDimensions = layoutInlineChildren(constraints.maxWidth,
+            ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
         _layoutTextWithConstraints(constraints);
         positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
@@ -315,6 +315,7 @@ mixin TextOverflowMixin on _RenderParagraph {
     layoutInlineChildren(
       constraints.maxWidth,
       ChildLayoutHelper.layoutChild,
+      ChildLayoutHelper.getBaseline,
       textPainter: testTextPainter,
       hideWidgets: hideWidgets,
     );
@@ -881,7 +882,8 @@ mixin TextOverflowMixin on _RenderParagraph {
   @override
   List<PlaceholderDimensions> layoutInlineChildren(
     double maxWidth,
-    ChildLayouter layoutChild, {
+    ChildLayouter layoutChild,
+    ChildBaselineGetter getChildBaseline, {
     // zmtzawqlp
     List<int>? hideWidgets,
     // zmtzawqlp
